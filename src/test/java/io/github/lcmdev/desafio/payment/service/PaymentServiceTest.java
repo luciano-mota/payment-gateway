@@ -422,4 +422,23 @@ class PaymentServiceTest {
         () -> verify(authorizerClient).authorize()
     );
   }
+  @Test
+  void shouldReturnExceptionCancelChargeCardWhenDoesNotAuthorizer() {
+    var chargeMock = createChargePaidMock();
+    chargeMock.setPaymentMethod(CARD);
+
+    when(chargeRepository.findById(any())).thenReturn(Optional.of(chargeMock));
+    when(authorizerClient.authorize()).thenReturn(false);
+
+    var exception = assertThrows(IllegalStateException.class,
+        () -> paymentService.cancelCharge(1L, 1L)
+    );
+
+    assertAll(
+        () -> assertNotNull(exception),
+        () -> assertEquals("Authorizer denied chargeback", exception.getMessage()),
+        () -> verify(chargeRepository).findById(any()),
+        () -> verify(authorizerClient).authorize()
+    );
+  }
 }
