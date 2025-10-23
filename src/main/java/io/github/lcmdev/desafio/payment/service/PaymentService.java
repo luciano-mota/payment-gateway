@@ -33,13 +33,13 @@ public class PaymentService {
     @Transactional
     public Charge createCharge(Long originId, String destinationCpf, BigDecimal amount, String description) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Valor deve ser positivo");
+            throw new IllegalArgumentException("Value must be positive");
         }
         var userOrigin = userRepository.findById(originId).orElseThrow(() -> new IllegalArgumentException("Origin user not found"));
         var userDestination = userRepository.findByCpf(destinationCpf).orElseThrow(() -> new IllegalArgumentException("Destination user not found"));
 
         if (userOrigin.getId().equals(userDestination.getId())) {
-            throw new IllegalArgumentException("Origem e destino não podem ser iguais");
+            throw new IllegalArgumentException("Origin and destination cannot be the same");
         }
 
         var charge = Charge.builder()
@@ -68,20 +68,20 @@ public class PaymentService {
 
     @Transactional
     public Charge payByBalance(Long payerId, Long chargeId) {
-        var charge = chargeRepository.findById(chargeId).orElseThrow(() -> new IllegalStateException("Cobrança não encontrada"));
+        var charge = chargeRepository.findById(chargeId).orElseThrow(() -> new IllegalStateException("Charge not found"));
 
         if (!charge.getStatus().equals(ChargeStatusEnum.PENDING)) {
-            throw new IllegalStateException("Cobrança não está pendente");
+            throw new IllegalStateException("Charge is not pending");
         }
 
         var payer = charge.getDestination();
         if (!payer.getId().equals(payerId)) {
-            throw new IllegalStateException("Usuário pagador inválido");
+            throw new IllegalStateException("Invalid paying user");
         }
 
         var payerAccount = payer.getAccount();
         if (payerAccount.getBalance().compareTo(charge.getAmount()) < 0) {
-            throw new IllegalArgumentException("Saldo insuficiente");
+            throw new IllegalArgumentException("Insufficient balance");
         }
 
         var receiver = charge.getOrigin();
@@ -99,7 +99,7 @@ public class PaymentService {
     @Transactional
     public boolean deposit(Long userId, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Valor deve ser positivo");
+            throw new IllegalArgumentException("Value must be positive");
         }
 
         if (!authorizerClient.authorize()) {
@@ -122,11 +122,11 @@ public class PaymentService {
         var charge = chargeRepository.findById(chargeId).orElseThrow();
 
         if (!charge.getStatus().equals(PENDING)) {
-            throw new IllegalStateException("Cobrança não está pendente");
+            throw new IllegalStateException("Charge is not pending");
         }
 
         if (!charge.getDestination().getId().equals(payerId)) {
-            throw new IllegalStateException("Usuário pagador inválido");
+            throw new IllegalStateException("Invalid paying user");
         }
 
         charge.setStatus(PAID);
@@ -160,7 +160,7 @@ public class PaymentService {
 
     private void authorizeCancel(Long userId, Charge charge) {
         if (!charge.getOrigin().getId().equals(userId) && !charge.getDestination().getId().equals(userId)) {
-            throw new IllegalStateException("Usuário não autorizado a cancelar");
+            throw new IllegalStateException("User not authorized to cancel");
         }
     }
 
@@ -196,7 +196,7 @@ public class PaymentService {
 
     private Charge refundCard(Charge charge) {
         if (!authorizerClient.authorize()) {
-            throw new IllegalStateException("Autorizador negou estorno");
+            throw new IllegalStateException("Authorizer denied chargeback");
         }
 
         var receiver = charge.getOrigin();
