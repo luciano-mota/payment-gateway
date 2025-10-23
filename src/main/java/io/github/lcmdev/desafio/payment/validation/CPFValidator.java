@@ -1,9 +1,9 @@
 package io.github.lcmdev.desafio.payment.validation;
 
+import static java.util.Objects.isNull;
+
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-
-import static java.util.Objects.isNull;
 
 public class CPFValidator implements ConstraintValidator<CPF, String> {
 
@@ -48,7 +48,6 @@ public class CPFValidator implements ConstraintValidator<CPF, String> {
                 return false;
             }
         }
-
         return true;
     }
 }
