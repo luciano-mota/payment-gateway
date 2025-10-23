@@ -1,8 +1,8 @@
 package io.github.lcmdev.desafio.payment.util;
 
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import static java.util.Objects.isNull;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public final class SecurityUtil {
     private SecurityUtil() {}
@@ -26,4 +26,3 @@ public final class SecurityUtil {
         }
     }
 }
-
