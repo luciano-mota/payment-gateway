@@ -1,11 +1,24 @@
 package io.github.lcmdev.desafio.payment.model;
 
+import io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum;
+import io.github.lcmdev.desafio.payment.controller.enums.PaymentMethodEnum;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "charges")
+@Table(name = "tb_charges")
 public class Charge {
 
     @Id
@@ -26,31 +39,12 @@ public class Charge {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    private ChargeStatus status = ChargeStatus.PENDING;
+    private ChargeStatusEnum status;
 
     @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
+    private PaymentMethodEnum paymentMethod;
 
-    private Instant createdAt = Instant.now();
-
-    public enum ChargeStatus { PENDING, PAID, CANCELED }
-    public enum PaymentMethod { BALANCE, CARD }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public User getOrigin() { return origin; }
-    public void setOrigin(User origin) { this.origin = origin; }
-    public User getDestination() { return destination; }
-    public void setDestination(User destination) { this.destination = destination; }
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public ChargeStatus getStatus() { return status; }
-    public void setStatus(ChargeStatus status) { this.status = status; }
-    public PaymentMethod getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
 }
-
