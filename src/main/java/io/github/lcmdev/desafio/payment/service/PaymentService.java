@@ -37,6 +37,11 @@ public class PaymentService {
         }
         var userOrigin = userRepository.findById(originId).orElseThrow(() -> new IllegalArgumentException("Origin user not found"));
         var userDestination = userRepository.findByCpf(destinationCpf).orElseThrow(() -> new IllegalArgumentException("Destination user not found"));
+
+        if (userOrigin.getId().equals(userDestination.getId())) {
+            throw new IllegalArgumentException("Origem e destino não podem ser iguais");
+        }
+
         var charge = Charge.builder()
                 .origin(userOrigin)
                 .destination(userDestination)
@@ -63,27 +68,30 @@ public class PaymentService {
 
     @Transactional
     public Charge payByBalance(Long payerId, Long chargeId) {
-        var charge = chargeRepository.findById(chargeId).orElseThrow();
+        var charge = chargeRepository.findById(chargeId).orElseThrow(() -> new IllegalStateException("Cobrança não encontrada"));
 
         if (!charge.getStatus().equals(ChargeStatusEnum.PENDING)) {
             throw new IllegalStateException("Cobrança não está pendente");
         }
 
-        var payer = userRepository.findById(payerId).orElseThrow();
-        var payerAccount = payer.getAccount();
+        var payer = charge.getDestination();
+        if (!payer.getId().equals(payerId)) {
+            throw new IllegalStateException("Usuário pagador inválido");
+        }
 
+        var payerAccount = payer.getAccount();
         if (payerAccount.getBalance().compareTo(charge.getAmount()) < 0) {
             throw new IllegalArgumentException("Saldo insuficiente");
         }
-        var destination = charge.getDestination();
-        var destinationAccount = destination.getAccount();
+
+        var receiver = charge.getOrigin();
+        var receiverAccount = receiver.getAccount();
+
         payerAccount.setBalance(payerAccount.getBalance().subtract(charge.getAmount()));
-        destinationAccount.setBalance(destinationAccount.getBalance().add(charge.getAmount()));
+        receiverAccount.setBalance(receiverAccount.getBalance().add(charge.getAmount()));
+
         charge.setStatus(PAID);
         charge.setPaymentMethod(BALANCE);
-
-        userRepository.save(payer);
-        userRepository.save(destination);
 
         return chargeRepository.save(charge);
     }
@@ -117,13 +125,19 @@ public class PaymentService {
             throw new IllegalStateException("Cobrança não está pendente");
         }
 
+        if (!charge.getDestination().getId().equals(payerId)) {
+            throw new IllegalStateException("Usuário pagador inválido");
+        }
+
         charge.setStatus(PAID);
         charge.setPaymentMethod(CARD);
 
-        var destination = charge.getDestination();
-        var destinationAccount = destination.getAccount();
-        destinationAccount.setBalance(destinationAccount.getBalance().add(charge.getAmount()));
-        userRepository.save(destination);
+        var receiver = charge.getOrigin();
+        var receiverAccount = receiver.getAccount();
+        receiverAccount.setBalance(receiverAccount.getBalance().add(charge.getAmount()));
+        userRepository.save(receiver);
+
+        chargeRepository.save(charge);
 
         return true;
     }
@@ -165,16 +179,16 @@ public class PaymentService {
     }
 
     private Charge refundBalance(Charge charge) {
-        var payer = charge.getOrigin();
+        var receiver = charge.getOrigin();
+        var receiverAccount = receiver.getAccount();
+        receiverAccount.setBalance(receiverAccount.getBalance().subtract(charge.getAmount()));
+
+        var payer = charge.getDestination();
         var payerAccount = payer.getAccount();
         payerAccount.setBalance(payerAccount.getBalance().add(charge.getAmount()));
 
-        var destination = charge.getDestination();
-        var destinationAccount = destination.getAccount();
-        destinationAccount.setBalance(destinationAccount.getBalance().subtract(charge.getAmount()));
-
+        userRepository.save(receiver);
         userRepository.save(payer);
-        userRepository.save(destination);
 
         charge.setStatus(CANCELED);
         return chargeRepository.save(charge);
@@ -185,10 +199,10 @@ public class PaymentService {
             throw new IllegalStateException("Autorizador negou estorno");
         }
 
-        var destination = charge.getDestination();
-        var destinationAccount = destination.getAccount();
-        destinationAccount.setBalance(destinationAccount.getBalance().subtract(charge.getAmount()));
-        userRepository.save(destination);
+        var receiver = charge.getOrigin();
+        var receiverAccount = receiver.getAccount();
+        receiverAccount.setBalance(receiverAccount.getBalance().subtract(charge.getAmount()));
+        userRepository.save(receiver);
 
         charge.setStatus(CANCELED);
         return chargeRepository.save(charge);
