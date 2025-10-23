@@ -18,3 +18,8 @@ spring:
       ddl-auto: none
   flyway:
     baselineOnMigrate: ${SPRING_FLYWAY_BASELINE_ON_MIGRATE:true}
+
+external:
+  authorizer:
+    payment:
+      url: https://zsy6tx7aql.execute-api.sa-east-1.amazonaws.com/authorizer
