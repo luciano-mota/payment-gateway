@@ -115,6 +115,15 @@ class ChargeControllerTest {
   }
 
   @Test
+  void shouldReturnOkWhenReceivedChargesExists() throws Exception {
+    mockedSecurityUtil.when(SecurityUtil::getCurrentUserId).thenReturn(2L);
+    when(paymentService.listChargesReceived(eq(2L), any())).thenReturn(toChargeResponse(List.of(createChargePendingMock())));
+
+    mockMvc.perform(get("/api/v1/charges/received").param("status", "PENDING"))
+        .andExpect(status().isOk());
+  }
+
+  @Test
   void shouldPayByBalanceWithSuccess() throws Exception {
     mockedSecurityUtil.when(SecurityUtil::getCurrentUserId).thenReturn(2L);
     var paidCharge = Mockito.mock(Charge.class);
