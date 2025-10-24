@@ -1,9 +1,10 @@
 package io.github.lcmdev.desafio.payment.controller;
 
+import io.github.lcmdev.desafio.payment.controller.dto.response.ChargeResponseDTO;
 import io.github.lcmdev.desafio.payment.controller.dto.request.CardPaymentRequestDTO;
 import io.github.lcmdev.desafio.payment.controller.dto.request.CreateChargeRequestDTO;
 import io.github.lcmdev.desafio.payment.controller.dto.request.DepositRequestDTO;
-import io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum;
+import io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum;
 import io.github.lcmdev.desafio.payment.model.Charge;
 import io.github.lcmdev.desafio.payment.service.PaymentService;
 import io.github.lcmdev.desafio.payment.util.SecurityUtil;
@@ -38,7 +39,7 @@ public class ChargeController {
     }
 
     @GetMapping("/sent")
-    public ResponseEntity<List<Charge>> sent(@RequestParam(required = false) String status) {
+    public ResponseEntity<List<ChargeResponseDTO>> sent(@RequestParam(required = false) String status) {
         var userId = SecurityUtil.getCurrentUserId();
         var chargeStatus = Optional.ofNullable(status).map(String::toUpperCase).map(ChargeStatusEnum::valueOf);
         var charges = paymentService.listChargesSent(userId, chargeStatus);
@@ -50,7 +51,7 @@ public class ChargeController {
     }
 
     @GetMapping("/received")
-    public ResponseEntity<List<Charge>> received(@RequestParam(required = false) String status) {
+    public ResponseEntity<List<ChargeResponseDTO>> received(@RequestParam(required = false) String status) {
         var userId = SecurityUtil.getCurrentUserId();
         var chargeStatus = Optional.ofNullable(status).map(String::toUpperCase).map(ChargeStatusEnum::valueOf);
         var chargesReceivedList = paymentService.listChargesReceived(userId, chargeStatus);

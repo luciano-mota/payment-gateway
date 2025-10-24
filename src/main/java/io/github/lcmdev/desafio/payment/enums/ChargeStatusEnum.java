@@ -1,4 +1,4 @@
-package io.github.lcmdev.desafio.payment.controller.enums;
+package io.github.lcmdev.desafio.payment.enums;
 
 public enum ChargeStatusEnum {
 

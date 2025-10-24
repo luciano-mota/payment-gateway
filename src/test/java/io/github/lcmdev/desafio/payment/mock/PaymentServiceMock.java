@@ -1,7 +1,7 @@
 package io.github.lcmdev.desafio.payment.mock;
 
-import static io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum.PAID;
-import static io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum.PENDING;
+import static io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum.PAID;
+import static io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum.PENDING;
 
 import io.github.lcmdev.desafio.payment.model.Account;
 import io.github.lcmdev.desafio.payment.model.Charge;

@@ -1,8 +1,8 @@
 package io.github.lcmdev.desafio.payment.service;
 
-import static io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum.PENDING;
-import static io.github.lcmdev.desafio.payment.controller.enums.PaymentMethodEnum.BALANCE;
-import static io.github.lcmdev.desafio.payment.controller.enums.PaymentMethodEnum.CARD;
+import static io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum.PENDING;
+import static io.github.lcmdev.desafio.payment.enums.PaymentMethodEnum.BALANCE;
+import static io.github.lcmdev.desafio.payment.enums.PaymentMethodEnum.CARD;
 import static io.github.lcmdev.desafio.payment.mock.PaymentServiceMock.createChargePaidMock;
 import static io.github.lcmdev.desafio.payment.mock.PaymentServiceMock.createChargePendingMock;
 import static io.github.lcmdev.desafio.payment.mock.PaymentServiceMock.createChargeWithInsufficientBalanceMock;
