@@ -13,49 +13,49 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
+  private final UserRepository userRepository;
+  private final BCryptPasswordEncoder passwordEncoder;
+  private final JwtUtil jwtUtil;
 
-    public User register(RegisterRequestDTO requestDTO) {
-        if (userRepository.findByCpf(requestDTO.cpf()).isPresent()) {
-            throw new IllegalArgumentException("CPF já cadastrado");
-        }
-        if (userRepository.findByEmail(requestDTO.email()).isPresent()) {
-            throw new IllegalArgumentException("Email já cadastrado");
-        }
-
-        var user = completeUserRegistration(requestDTO);
-
-        return userRepository.save(user);
+  public User register(RegisterRequestDTO requestDTO) {
+    if (userRepository.findByCpf(requestDTO.cpf()).isPresent()) {
+      throw new IllegalArgumentException("CPF already registered");
+    }
+    if (userRepository.findByEmail(requestDTO.email()).isPresent()) {
+      throw new IllegalArgumentException("Email already registered");
     }
 
-    public String login(String login, String password) {
-        var user = userRepository.findByCpf(login)
-                .or(() -> userRepository.findByEmail(login));
+    var user = completeUserRegistration(requestDTO);
 
-        if (user.isEmpty()) {
-            throw new IllegalArgumentException("Credenciais inválidas");
-        }
+    return userRepository.save(user);
+  }
 
-        if (!passwordEncoder.matches(password, user.get().getPasswordHash())) {
-            throw new IllegalArgumentException("Credenciais inválidas");
-        }
+  public String login(String login, String password) {
+    var user = userRepository.findByCpf(login)
+        .or(() -> userRepository.findByEmail(login));
 
-        return jwtUtil.generateToken(user.get().getId());
+    if (user.isEmpty()) {
+      throw new IllegalArgumentException("Invalid credentials");
     }
 
-    private User completeUserRegistration( RegisterRequestDTO dto) {
-        var user = new User();
-        var account = new Account();
-
-        user.setName(dto.name());
-        user.setCpf(dto.cpf());
-        user.setEmail(dto.email());
-        user.setPasswordHash(passwordEncoder.encode(dto.password()));
-
-        account.setUser(user);
-        user.setAccount(account);
-        return user;
+    if (!passwordEncoder.matches(password, user.get().getPasswordHash())) {
+      throw new IllegalArgumentException("Invalid credentials");
     }
+
+    return jwtUtil.generateToken(user.get().getId());
+  }
+
+  private User completeUserRegistration(RegisterRequestDTO dto) {
+    var user = new User();
+    var account = new Account();
+
+    user.setName(dto.name());
+    user.setCpf(dto.cpf());
+    user.setEmail(dto.email());
+    user.setPasswordHash(passwordEncoder.encode(dto.password()));
+
+    account.setUser(user);
+    user.setAccount(account);
+    return user;
+  }
 }
