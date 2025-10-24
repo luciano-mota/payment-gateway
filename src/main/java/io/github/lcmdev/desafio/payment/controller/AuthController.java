@@ -18,25 +18,25 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+  private final AuthService authService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequestDTO requestDTO) {
-        try {
-            var user = authService.register(requestDTO);
-            return ResponseEntity.ok(Map.of("id", user.getId()));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
-        }
+  @PostMapping("/register")
+  public ResponseEntity<?> register(@RequestBody @Valid RegisterRequestDTO requestDTO) {
+    try {
+      var user = authService.register(requestDTO);
+      return ResponseEntity.ok(Map.of("id", user.getId()));
+    } catch (IllegalArgumentException ex) {
+      return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
     }
+  }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
-        try {
-            var token = authService.login(loginRequestDTO.login(), loginRequestDTO.password());
-            return ResponseEntity.ok(Map.of("token", token));
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.status(401).body(Map.of("error", ex.getMessage()));
-        }
+  @PostMapping("/login")
+  public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO) {
+    try {
+      var token = authService.login(loginRequestDTO.login(), loginRequestDTO.password());
+      return ResponseEntity.ok(Map.of("token", token));
+    } catch (IllegalArgumentException ex) {
+      return ResponseEntity.status(401).body(Map.of("error", ex.getMessage()));
     }
+  }
 }
