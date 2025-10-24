@@ -19,7 +19,7 @@ A aplicação foi projetada para como sendo parte do desafio da empresa Nimble B
 
 Para executar o projeto localmente, você precisará ter o **Docker** e o **Docker Compose** instalados.
 No projeto já existem os arquivos Dockerfile e docker-compose.yaml para executar o projeto localmente.
-Basta simplesmente executar o comando `docker-compose up` no terminal dentro da pasta raiz do projeto para startar o projeto.
+Basta simplesmente executar o comando `docker-compose up` no terminal dentro da pasta raiz do projeto para startar o mesmo.
 
 
 ## ⚙️ Uso da API
