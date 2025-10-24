@@ -1,17 +1,20 @@
 package io.github.lcmdev.desafio.payment.service;
 
-import static io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum.CANCELED;
-import static io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum.PAID;
-import static io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum.PENDING;
-import static io.github.lcmdev.desafio.payment.controller.enums.PaymentMethodEnum.BALANCE;
-import static io.github.lcmdev.desafio.payment.controller.enums.PaymentMethodEnum.CARD;
+import static io.github.lcmdev.desafio.payment.controller.dto.response.ChargeResponseDTO.toChargeResponse;
+import static io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum.CANCELED;
+import static io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum.PAID;
+import static io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum.PENDING;
+import static io.github.lcmdev.desafio.payment.enums.PaymentMethodEnum.BALANCE;
+import static io.github.lcmdev.desafio.payment.enums.PaymentMethodEnum.CARD;
 
 import io.github.lcmdev.desafio.payment.client.AuthorizerClient;
-import io.github.lcmdev.desafio.payment.controller.enums.ChargeStatusEnum;
+import io.github.lcmdev.desafio.payment.controller.dto.response.ChargeResponseDTO;
+import io.github.lcmdev.desafio.payment.enums.ChargeStatusEnum;
 import io.github.lcmdev.desafio.payment.model.Charge;
 import io.github.lcmdev.desafio.payment.repository.ChargeRepository;
 import io.github.lcmdev.desafio.payment.repository.UserRepository;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -49,23 +52,23 @@ public class PaymentService {
         return chargeRepository.save(charge);
     }
 
-    public List<Charge> listChargesSent(Long originId, Optional<ChargeStatusEnum> status) {
+    public List<ChargeResponseDTO> listChargesSent(Long originId, Optional<ChargeStatusEnum> status) {
         var userOrigin = userRepository.findById(originId).orElseThrow(() -> new IllegalArgumentException("Origin user not found"));
-        return status.map(chargeStatus -> chargeRepository.findByOriginAndStatus(userOrigin, chargeStatus))
-                .orElseGet(() -> chargeRepository.findByOrigin(userOrigin));
+        return toChargeResponse(status.map(chargeStatus -> chargeRepository.findByOriginAndStatus(userOrigin, chargeStatus))
+                .orElseGet(() -> chargeRepository.findByOrigin(userOrigin)));
     }
 
-    public List<Charge> listChargesReceived(Long destinationId, Optional<ChargeStatusEnum> status) {
+    public List<ChargeResponseDTO> listChargesReceived(Long destinationId, Optional<ChargeStatusEnum> status) {
         var userDestination = userRepository.findById(destinationId).orElseThrow(() -> new IllegalArgumentException("Destination user not found"));
-        return status.map(chargeStatus -> chargeRepository.findByDestinationAndStatus(userDestination, chargeStatus))
-                .orElseGet(() -> chargeRepository.findByDestination(userDestination));
+        return toChargeResponse(status.map(chargeStatus -> chargeRepository.findByDestinationAndStatus(userDestination, chargeStatus))
+                .orElseGet(() -> chargeRepository.findByDestination(userDestination)));
     }
 
     @Transactional
     public Charge payByBalance(Long payerId, Long chargeId) {
         var charge = chargeRepository.findById(chargeId).orElseThrow(() -> new IllegalStateException("Charge not found"));
 
-        if (!charge.getStatus().equals(ChargeStatusEnum.PENDING)) {
+        if (!charge.getStatus().equals(PENDING)) {
             throw new IllegalStateException("Charge is not pending");
         }
 
