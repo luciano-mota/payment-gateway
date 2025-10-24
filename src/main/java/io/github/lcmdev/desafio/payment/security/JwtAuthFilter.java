@@ -14,26 +14,28 @@ import java.io.IOException;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+  private final JwtUtil jwtUtil;
 
-    public JwtAuthFilter(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
+  public JwtAuthFilter(JwtUtil jwtUtil) {
+    this.jwtUtil = jwtUtil;
+  }
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            try {
-                Long userId = jwtUtil.validateAndGetUserId(token);
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, null);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            } catch (Exception ex) {
-                SecurityContextHolder.clearContext();
-            }
-        }
-        filterChain.doFilter(request, response);
+  @Override
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+      FilterChain filterChain) throws ServletException, IOException {
+    String header = request.getHeader("Authorization");
+    if (header != null && header.startsWith("Bearer ")) {
+      String token = header.substring(7);
+      try {
+        Long userId = jwtUtil.validateAndGetUserId(token);
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId,
+            null, null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+      } catch (Exception ex) {
+        SecurityContextHolder.clearContext();
+      }
     }
+    filterChain.doFilter(request, response);
+  }
 }
 
